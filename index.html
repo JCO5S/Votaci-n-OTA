@@ -1,0 +1,159 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voting Portal</title>
+    <style>
+        body {
+            background-color: #000;
+            color: #00ff00;
+            font-family: Consolas, monospace;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            padding: 20px;
+            border: 2px solid #00ff00;
+            border-radius: 8px;
+        }
+        button {
+            background-color: #000;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            margin: 4px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-family: Consolas, monospace;
+        }
+        input {
+            background-color: #000;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 8px;
+            width: 100%;
+            font-family: Consolas, monospace;
+        }
+        .log {
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+            border: 2px solid #00ff00;
+            border-radius: 5px;
+        }
+        .error {
+            color: #ff0000;
+            text-align: center;
+            margin: 10px 0;
+        }
+    </style>
+    <script>
+        let step = 'login';
+        let selectedRole = '';
+        let votes = {};
+        let votingLog = [];
+        let securityAnswer = '';
+        const roles = [
+            'El Administrador',
+            'El Asistente',
+            'Supervisor de la Oficina de El Administrador',
+            'Secretario General',
+            'Relaciones Públicas'
+        ];
+        const securityAnswers = {
+            'El Administrador': 'Solo cuando raya el alba.',
+            'Relaciones Públicas': 'La luna ya no es negra cuando una estrella la hacé brillar a no dar mas.'
+        };
+        function render() {
+            const container = document.getElementById('app');
+            if (step === 'login') {
+                container.innerHTML = `
+                    <div>
+                        <h1>Sistema de Autenticación</h1>
+                        <h2>Oficina de El Administrador</h2>
+                        <h3>Seleccione su cargo para continuar:</h3>
+                        ${roles.map(role => `<button onclick="handleRoleSelect('${role}')">&gt; ${role}</button>`).join('')}
+                    </div>`;
+            } else if (step === 'confirm') {
+                container.innerHTML = `
+                    <div>
+                        <h3>¿Estás seguro de que este es tu cargo?</h3>
+                        <p>&gt; ${selectedRole}</p>
+                        <button onclick="handleConfirm(true)">SÍ</button>
+                        <button onclick="handleConfirm(false)">NO</button>
+                    </div>`;
+            } else if (step === 'security') {
+                container.innerHTML = `
+                    <div>
+                        <h3>Pregunta de Seguridad</h3>
+                        <p>¿Aúlla la Luna Negra?</p>
+                        <input type="text" id="security-input" placeholder="Ingrese su respuesta de seguridad" />
+                        <div id="error" class="error"></div>
+                        <button onclick="handleSecurityCheck()">Verificar</button>
+                    </div>`;
+            } else if (step === 'welcome') {
+                container.innerHTML = `
+                    <div>
+                        <h1>Hellenstic.aic</h1>
+                        <h2>VOTACIÓN PARA LA OFICINA DE EL ADMINISTRADOR</h2>
+                        <p>
+                            Buenos días, tardes o noches, señores miembros de la Oficina de El Administrador, soy El Administrador Interino de la Fundación SCP.
+                        </p>
+                        <button onclick="setStep('vote')">Proceder a la votación</button>
+                    </div>`;
+            } else if (step === 'vote') {
+                container.innerHTML = `
+                    <div>
+                        <h3>¿Aprueba a la Doctora Sofia Light como nueva Administradora?</h3>
+                        <button onclick="handleVote(true)" style="color: #00ff00;">SÍ</button>
+                        <button onclick="handleVote(false)" style="color: #ff0000;">NO</button>
+                    </div>`;
+            } else if (step === 'complete') {
+                container.innerHTML = `
+                    <div>
+                        <h3>Gracias por Su Voto</h3>
+                        <button onclick="setStep('login')">Volver al inicio</button>
+                    </div>`;
+            }
+        }
+        function setStep(newStep) {
+            step = newStep;
+            render();
+        }
+        function handleRoleSelect(role) {
+            selectedRole = role;
+            setStep('confirm');
+        }
+        function handleConfirm(confirmed) {
+            if (confirmed) setStep('security');
+            else setStep('login');
+        }
+        function handleSecurityCheck() {
+            const input = document.getElementById('security-input').value.trim();
+            const correctAnswer = securityAnswers[selectedRole];
+            const errorDiv = document.getElementById('error');
+            if (input === correctAnswer) {
+                setStep('welcome');
+            } else {
+                errorDiv.textContent = 'Error: Respuesta incorrecta, intente de nuevo.';
+            }
+        }
+        function handleVote(vote) {
+            votes[selectedRole] = vote;
+            votingLog.push({ role: selectedRole, vote: vote ? 'SÍ' : 'NO' });
+            setStep('complete');
+        }
+        window.onload = render;
+    </script>
+</head>
+<body>
+    <div class="container" id="app"></div>
+</body>
+</html>
